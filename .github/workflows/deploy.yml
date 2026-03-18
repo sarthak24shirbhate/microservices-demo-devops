@@ -1,0 +1,41 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ap-south-1
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region ap-south-1 \
+          | docker login \
+          --username AWS \
+          --password-stdin 348265566898.dkr.ecr.ap-south-1.amazonaws.com
+
+      - name: Build image
+        run: |
+          docker build -t microservices-demo .
+
+      - name: Tag image
+        run: |
+          docker tag microservices-demo:latest \
+          348265566898.dkr.ecr.ap-south-1.amazonaws.com/microservices-demo:latest
+
+      - name: Push image
+        run: |
+          docker push 348265566898.dkr.ecr.ap-south-1.amazonaws.com/microservices-demo:latest
