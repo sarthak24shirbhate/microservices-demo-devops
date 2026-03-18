@@ -29,7 +29,7 @@ jobs:
 
       - name: Build image
         run: |
-          docker build -t microservices-demo .
+          docker build -t microservices-demo ./src/frontend
 
       - name: Tag image
         run: |
